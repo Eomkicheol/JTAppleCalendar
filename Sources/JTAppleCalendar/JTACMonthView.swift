@@ -224,7 +224,12 @@ extension JTACMonthView {
     open override var semanticContentAttribute: UISemanticContentAttribute {
         didSet {
             var superviewIsRTL =  false
-            if let validSuperView = superview?.effectiveUserInterfaceLayoutDirection { superviewIsRTL = validSuperView == .rightToLeft && semanticContentAttribute == .unspecified }
+            if #available(iOS 10.0, *) {
+                if let validSuperView = superview?.effectiveUserInterfaceLayoutDirection { superviewIsRTL = validSuperView == .rightToLeft && semanticContentAttribute == .unspecified }
+            } else {
+                // Fallback on earlier versions
+                if let validSuperView = superview?.semanticContentAttribute { superviewIsRTL = validSuperView == .forceRightToLeft && semanticContentAttribute == .unspecified }
+            }
             transform.a = semanticContentAttribute == .forceRightToLeft || superviewIsRTL ? -1: 1
         }
     }

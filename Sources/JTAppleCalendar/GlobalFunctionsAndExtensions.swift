@@ -34,13 +34,27 @@ extension Calendar {
     
 
     func startOfMonth(for date: Date) -> Date? {
-        guard let interval = self.dateInterval(of: .month, for: date) else { return nil }
-        return interval.start
+        if #available(iOS 10.0, *) {
+            guard let interval = self.dateInterval(of: .month, for: date) else { return nil }
+            return interval.start
+        } else {
+            // Fallback on earlier versions
+            let interval = self.dateComponents([.era, .year, .month, .day, .hour], from: date)
+            return self.date(from: interval)
+        }
+
     }
     
     func endOfMonth(for date: Date) -> Date? {
-        guard let interval = self.dateInterval(of: .month, for: date) else { return nil }
-        return self.date(byAdding: DateComponents(day: -1), to: interval.end)
+        if #available(iOS 10.0, *) {
+            guard let interval = self.dateInterval(of: .month, for: date) else { return nil }
+            return self.date(byAdding: DateComponents(day: -1), to: interval.end)
+        } else {
+            var lastDayComponents = self.dateComponents([.era, .year, .month, .day, .hour], from: date)
+            lastDayComponents.month = lastDayComponents.month! + 1
+            lastDayComponents.day = 0
+            return self.date(from: lastDayComponents)
+        }
     }
     
     private func dateFormatterComponents(from date: Date) -> (month: Int, year: Int)? {
